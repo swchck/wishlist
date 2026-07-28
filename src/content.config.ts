@@ -17,7 +17,13 @@ const items = defineCollection({
       links: z
         .array(z.object({ label: z.string(), url: z.string().url() }))
         .optional(),
-      image: z.union([image(), z.string().url()]).optional(),
+      image: z
+        .union([
+          image(),
+          z.string().url(),
+          z.array(z.union([image(), z.string().url()])),
+        ])
+        .optional(),
       images: z.array(z.union([image(), z.string().url()])).optional(),
       description: z.string().optional(),
       hidden: z.boolean().default(false),

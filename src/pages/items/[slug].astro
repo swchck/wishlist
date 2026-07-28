@@ -9,6 +9,7 @@ import {
     PRIORITY_LABELS,
 } from "../../lib/format";
 import { getRates, toEur } from "../../lib/currency";
+import { photosOf } from "../../lib/photos";
 import PriceTag from "../../components/PriceTag.astro";
 
 export async function getStaticPaths() {
@@ -34,9 +35,7 @@ const wantLabel =
 const deadlineLabel = formatDeadline(data.deadline);
 const deadlineIso = isoDate(data.deadline);
 
-const photos = (data.images ?? (data.image ? [data.image] : [])) as (
-    import("astro").ImageMetadata | string
-)[];
+const photos = photosOf(data);
 const isRemote = (x: unknown): x is string => typeof x === "string";
 
 const firstPhoto = photos[0];
@@ -70,6 +69,7 @@ const ogDesc =
                         <div
                             class={`shot ${i === 0 ? "on" : ""}`}
                             data-shot={i}
+                            hidden={i !== 0}
                         >
                             {isRemote(ph) ? (
                                 <img
@@ -77,9 +77,16 @@ const ogDesc =
                                     alt={data.title}
                                     width="1000"
                                     height="800"
+                                    decoding="async"
+                                    loading={i === 0 ? "eager" : "lazy"}
                                 />
                             ) : (
-                                <Image src={ph} alt={data.title} width={1000} />
+                                <Image
+                                    src={ph}
+                                    alt={data.title}
+                                    width={1000}
+                                    loading={i === 0 ? "eager" : "lazy"}
+                                />
                             )}
                         </div>
                     ))
@@ -247,20 +254,24 @@ const ogDesc =
         .shot {
             position: absolute;
             inset: 0;
-            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
         .shot.on {
-            display: block;
+            opacity: 1;
+        }
+        .shot[hidden] {
+            display: none;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .shot {
+                transition: none;
+            }
         }
         .shot :global(img) {
             width: 100%;
             height: 100%;
-            object-fit: contain;
-            padding: 16px;
-        }
-        .shot.fill :global(img) {
             object-fit: cover;
-            padding: 0;
         }
         .stage--empty {
             display: grid;
@@ -422,6 +433,7 @@ const ogDesc =
     </style>
 
     <script>
+        const stage = document.querySelector(".stage");
         const shots = Array.from(
             document.querySelectorAll<HTMLElement>("[data-shot]"),
         );
@@ -429,26 +441,55 @@ const ogDesc =
             document.querySelectorAll<HTMLButtonElement>("[data-thumb]"),
         );
 
-        for (const shot of shots) {
-            const img = shot.querySelector("img");
-            if (!img) continue;
-            const decide = () => {
-                if (img.naturalWidth >= img.naturalHeight)
-                    shot.classList.add("fill");
-                else shot.classList.remove("fill");
-            };
-            if (img.complete && img.naturalWidth) decide();
-            else img.addEventListener("load", decide);
-        }
+        let idx = 0;
+        const FADE = 500;
+        const show = (i: number) => {
+            idx = (i + shots.length) % shots.length;
+            shots.forEach((s, k) => {
+                if (k === idx) {
+                    s.hidden = false;
+                    requestAnimationFrame(() => s.classList.add("on"));
+                } else if (s.classList.contains("on")) {
+                    s.classList.remove("on");
+                    window.setTimeout(() => {
+                        if (idx !== k) s.hidden = true;
+                    }, FADE + 60);
+                } else {
+                    s.hidden = true;
+                }
+            });
+            thumbs.forEach((t, k) => t.classList.toggle("on", k === idx));
+        };
+
+        const reduce = window.matchMedia(
+            "(prefers-reduced-motion: reduce)",
+        ).matches;
+        const DELAY = 3800;
+        let timer: number | undefined;
+        const start = () => {
+            if (shots.length > 1 && !reduce && timer === undefined)
+                timer = window.setInterval(() => show(idx + 1), DELAY);
+        };
+        const stop = () => {
+            if (timer !== undefined) {
+                clearInterval(timer);
+                timer = undefined;
+            }
+        };
 
         for (const thumb of thumbs) {
             thumb.addEventListener("click", () => {
-                const i = thumb.dataset.thumb;
-                shots.forEach((s) =>
-                    s.classList.toggle("on", s.dataset.shot === i),
-                );
-                thumbs.forEach((t) => t.classList.toggle("on", t === thumb));
+                show(Number(thumb.dataset.thumb));
+                stop();
+                start();
             });
         }
+        stage?.addEventListener("mouseenter", stop);
+        stage?.addEventListener("mouseleave", start);
+        document.addEventListener("visibilitychange", () =>
+            document.hidden ? stop() : start(),
+        );
+
+        start();
     </script>
 </Base>

@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import Base from "../layouts/Base.astro";
 import ItemCard from "../components/ItemCard.astro";
 import { getRates, toEur } from "../lib/currency";
+import { photosOf } from "../lib/photos";
 import { GIFT_TYPES, GIFT_TYPE_PLURAL } from "../lib/types";
 
 const rates = await getRates();
@@ -87,7 +88,7 @@ const presentTypes = GIFT_TYPES.filter((t) =>
                     currency={item.data.currency}
                     priceEur={item.priceEur}
                     priority={item.data.priority}
-                    image={item.data.image ?? item.data.images?.[0]}
+                    image={photosOf(item.data)[0]}
                     deadline={item.data.deadline}
                 />
             ))
