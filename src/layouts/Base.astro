@@ -6,11 +6,18 @@ interface Props {
   description?: string;
   ogImage?: string;
 }
-const { title, description = 'Список желаемых подарков', ogImage } = Astro.props;
+const {
+  title,
+  description = 'Список подарков, которые я хочу — выбирай и бронируй, чтобы не подарить одно и то же дважды.',
+  ogImage,
+} = Astro.props;
 const base = import.meta.env.BASE_URL;
 const rates = await getRates();
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : Astro.url.pathname;
 const ymId = import.meta.env.PUBLIC_YM_ID;
+// Картинка для превью ссылок: у подарка — его фото, иначе брендовая og.png
+const defaultOg = Astro.site ? new URL(`${base}/og.png`, Astro.site).href : undefined;
+const ogImg = ogImage ?? defaultOg;
 ---
 
 <!doctype html>
@@ -54,11 +61,13 @@ const ymId = import.meta.env.PUBLIC_YM_ID;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    {ogImage && <meta property="og:image" content={ogImage} />}
-    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    {ogImg && <meta property="og:image" content={ogImg} />}
+    {ogImg && !ogImage && <meta property="og:image:width" content="1200" />}
+    {ogImg && !ogImage && <meta property="og:image:height" content="630" />}
+    <meta name="twitter:card" content={ogImg ? 'summary_large_image' : 'summary'} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    {ogImage && <meta name="twitter:image" content={ogImage} />}
+    {ogImg && <meta name="twitter:image" content={ogImg} />}
 
     {ymId && (
       <script
