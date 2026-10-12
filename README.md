@@ -102,6 +102,15 @@ Supabase: брони каждого хранятся под его `listId` и �
 достаточно тех же секретов `PUBLIC_SUPABASE_URL` и `PUBLIC_SUPABASE_ANON_KEY` — ключ и так
 публичный, данные защищают функции и политики из `supabase/schema.sql`.
 
+Вместо секретов URL и ключ можно вписать прямо в `wishlist.config.json` — так их проще
+передать: Wishlist Editor при создании вишлиста сделает это сам.
+
+```json
+"reservations": { "url": "https://xxxx.supabase.co", "anonKey": "sb_publishable_…" }
+```
+
+Секреты `PUBLIC_SUPABASE_*`, если заданы, важнее конфига.
+
 **Обновление базы, созданной до появления `listId`** (один раз):
 
 1. В `supabase/migrations/002-shared-lists.sql` впишите в `legacy` `listId` вишлиста,
