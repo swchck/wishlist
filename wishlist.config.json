@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
   "title": "Мой вишлист",
-  "defaultCurrency": "RUB"
+  "defaultCurrency": "RUB",
+  "listId": "swchck/wishlist"
 }

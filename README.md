@@ -33,12 +33,16 @@ npm run dev
 {
   "schemaVersion": 1,
   "title": "Мой вишлист",
-  "defaultCurrency": "RUB"
+  "defaultCurrency": "RUB",
+  "listId": "swchck/wishlist"
 }
 ```
 
 - `title` — заголовок главной страницы.
 - `defaultCurrency` — валюта карточки, если `currency` не указан.
+- `listId` — под каким именем этот вишлист хранит брони в Supabase (см. «Одна база на
+  несколько вишлистов»). Если не задан — берётся `owner/repo`. Задайте явно, чтобы брони
+  не потерялись при переименовании репозитория.
 - `schemaVersion` — версия формата карточек. По ней Wishlist Editor понимает, что умеет
   редактировать этот репозиторий. Не меняйте вручную.
 
@@ -91,6 +95,20 @@ description: Короткое описание для карточки.
 **Свободный подарок** (без конкретной ссылки на покупку) — просто не указывайте `url`
 и `price`, опишите желаемое в теле и дайте `links` с референсом.
 
+## Одна база на несколько вишлистов
+
+Несколько сайтов (например, ваш и вишлист партнёра) могут пользоваться одним проектом
+Supabase: брони каждого хранятся под его `listId` и друг другу не мешают. Второму вишлисту
+достаточно тех же секретов `PUBLIC_SUPABASE_URL` и `PUBLIC_SUPABASE_ANON_KEY` — ключ и так
+публичный, данные защищают функции и политики из `supabase/schema.sql`.
+
+**Обновление базы, созданной до появления `listId`** (один раз):
+
+1. В `supabase/migrations/002-shared-lists.sql` впишите в `legacy` `listId` вишлиста,
+   который уже пользуется базой, — его брони переедут туда.
+2. Supabase → **SQL Editor**: выполните этот файл, затем `supabase/schema.sql`.
+3. Сразу задеплойте сайт: между шагом 2 и деплоем кнопки брони на старом сайте не работают.
+
 ## Управление бронями
 
 Гость, забронировавший подарок, видит на нём кнопку **«Снять мою бронь»** (у остальных —
@@ -101,11 +119,13 @@ description: Короткое описание для карточки.
 
 ```sql
 -- снять бронь
-update public.reservations set reserved = false, reserved_at = null where slug = '<slug>';
-delete from public.reservation_secrets where slug = '<slug>';
+update public.reservations set reserved = false, reserved_at = null
+  where list = 'swchck/wishlist' and slug = '<slug>';
+delete from public.reservation_secrets where list = 'swchck/wishlist' and slug = '<slug>';
 -- посмотреть занятое
-select slug, reserved_at from public.reservations where reserved order by reserved_at;
--- сбросить всё после праздника
-update public.reservations set reserved = false, reserved_at = null;
-delete from public.reservation_secrets;
+select slug, reserved_at from public.reservations
+  where list = 'swchck/wishlist' and reserved order by reserved_at;
+-- сбросить всё после праздника (только этот вишлист)
+update public.reservations set reserved = false, reserved_at = null where list = 'swchck/wishlist';
+delete from public.reservation_secrets where list = 'swchck/wishlist';
 ```
