@@ -11,6 +11,7 @@ import {
 import { getRates, toEur } from "../../lib/currency";
 import { photosOf } from "../../lib/photos";
 import PriceTag from "../../components/PriceTag.astro";
+import { withBase } from "../../lib/url";
 
 export async function getStaticPaths() {
     const items = (await getCollection("items")).filter(
@@ -25,7 +26,6 @@ export async function getStaticPaths() {
 const { item } = Astro.props;
 const { data } = item;
 const { Content } = await render(item);
-const base = import.meta.env.BASE_URL;
 
 const rates = await getRates();
 const priceEur = toEur(data.price, data.currency, rates);
@@ -57,7 +57,7 @@ const ogDesc =
 ---
 
 <Base title={`${data.title} — Вишлист`} description={ogDesc} ogImage={ogImage}>
-    <a class="back" href={base}>← Ко всем подаркам</a>
+    <a class="back" href={withBase()}>← Ко всем подаркам</a>
 
     <article class="item" data-item-slug={item.id} data-item-title={data.title}>
         <div class="media-col">

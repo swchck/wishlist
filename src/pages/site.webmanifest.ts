@@ -1,6 +1,5 @@
 import type { APIRoute } from "astro";
-
-const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+import { withBase } from "../lib/url";
 
 export const GET: APIRoute = () =>
   new Response(
@@ -10,26 +9,26 @@ export const GET: APIRoute = () =>
       description: "Список желаемых подарков",
       lang: "ru",
       dir: "ltr",
-      start_url: base + "/",
-      scope: base + "/",
+      start_url: withBase(),
+      scope: withBase(),
       display: "standalone",
       background_color: "#f5f5f2",
       theme_color: "#f5f5f2",
       icons: [
         {
-          src: base + "/icon-192.png",
+          src: withBase("icon-192.png"),
           sizes: "192x192",
           type: "image/png",
           purpose: "any",
         },
         {
-          src: base + "/icon-512.png",
+          src: withBase("icon-512.png"),
           sizes: "512x512",
           type: "image/png",
           purpose: "any",
         },
         {
-          src: base + "/icon-512.png",
+          src: withBase("icon-512.png"),
           sizes: "512x512",
           type: "image/png",
           purpose: "maskable",

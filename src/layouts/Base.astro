@@ -1,5 +1,6 @@
 ---
 import { getRates } from '../lib/currency';
+import { withBase } from '../lib/url';
 
 interface Props {
   title: string;
@@ -11,12 +12,11 @@ const {
   description = 'Список подарков, которые я хочу — выбирай и бронируй, чтобы не подарить одно и то же дважды.',
   ogImage,
 } = Astro.props;
-const base = import.meta.env.BASE_URL;
 const rates = await getRates();
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : Astro.url.pathname;
 const ymId = import.meta.env.PUBLIC_YM_ID;
 // Картинка для превью ссылок: у подарка — его фото, иначе брендовая og.png
-const defaultOg = Astro.site ? new URL(`${base}/og.png`, Astro.site).href : undefined;
+const defaultOg = Astro.site ? new URL(withBase('og.png'), Astro.site).href : undefined;
 const ogImg = ogImage ?? defaultOg;
 ---
 
@@ -28,10 +28,10 @@ const ogImg = ogImage ?? defaultOg;
     <meta name="description" content={description} />
     <meta name="color-scheme" content="light dark" />
 
-    <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
-    <link rel="icon" href={`${base}/favicon-32.png`} sizes="32x32" type="image/png" />
-    <link rel="apple-touch-icon" href={`${base}/apple-touch-icon.png`} />
-    <link rel="manifest" href={`${base}/site.webmanifest`} />
+    <link rel="icon" href={withBase('favicon.svg')} type="image/svg+xml" />
+    <link rel="icon" href={withBase('favicon-32.png')} sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href={withBase('apple-touch-icon.png')} />
+    <link rel="manifest" href={withBase('site.webmanifest')} />
 
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f5f5f2" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0e0e0d" />
@@ -83,7 +83,7 @@ const ogImg = ogImage ?? defaultOg;
   </head>
   <body>
     <header class="site-header container">
-      <a class="brand" href={base}>
+      <a class="brand" href={withBase()}>
         <span class="brand-mark">✳</span>
         <span>вишлист</span>
       </a>

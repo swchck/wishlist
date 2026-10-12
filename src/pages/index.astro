@@ -5,6 +5,7 @@ import ItemCard from "../components/ItemCard.astro";
 import { getRates, toEur } from "../lib/currency";
 import { photosOf } from "../lib/photos";
 import { GIFT_TYPES, GIFT_TYPE_PLURAL } from "../lib/types";
+import { config } from "../lib/config";
 
 const rates = await getRates();
 const items = (await getCollection("items"))
@@ -20,7 +21,7 @@ const presentTypes = GIFT_TYPES.filter((t) =>
 );
 ---
 
-<Base title="Мой вишлист">
+<Base title={config.title}>
     <section class="hero">
         <h1>Что я хочу<br />получить в&nbsp;подарок</h1>
         <p class="lead">

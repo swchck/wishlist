@@ -1,8 +1,9 @@
 import * as p from "@clack/prompts";
-import { writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 
 const ITEMS_DIR = "src/content/items";
+const { defaultCurrency = "RUB" } = JSON.parse(readFileSync("wishlist.config.json", "utf-8"));
 
 const MAP = {
   а: "a",
@@ -137,25 +138,31 @@ const priority = guard(
 );
 
 let price = null;
-let currency = "RUB";
+let currency = defaultCurrency;
 const wantPrice =
   kind === "concrete"
     ? true
     : guard(await p.confirm({ message: "Указать цену?", initialValue: false }));
 
 if (wantPrice) {
+  const currencyOptions = [
+    { value: "RUB", label: "₽  Рубли" },
+    { value: "EUR", label: "€  Евро" },
+    { value: "USD", label: "$  Доллары" },
+    { value: "RSD", label: "дин.  Сербский динар" },
+    { value: "GBP", label: "£  Фунты" },
+  ];
+  if (!currencyOptions.some((o) => o.value === defaultCurrency)) {
+    currencyOptions.unshift({ value: defaultCurrency, label: defaultCurrency });
+  }
   currency = guard(
     await p.select({
       message: "Валюта",
       options: [
-        { value: "RUB", label: "₽  Рубли" },
-        { value: "EUR", label: "€  Евро" },
-        { value: "USD", label: "$  Доллары" },
-        { value: "RSD", label: "дин.  Сербский динар" },
-        { value: "GBP", label: "£  Фунты" },
+        ...currencyOptions,
         { value: "__other", label: "Другая (ввести код)" },
       ],
-      initialValue: "RUB",
+      initialValue: defaultCurrency,
     }),
   );
   if (currency === "__other") {

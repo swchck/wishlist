@@ -2,6 +2,7 @@
 import { Image } from "astro:assets";
 import { formatDeadline, isoDate, PRIORITY_LABELS } from "../lib/format";
 import PriceTag from "./PriceTag.astro";
+import { withBase } from "../lib/url";
 
 interface Props {
     slug: string;
@@ -17,8 +18,7 @@ interface Props {
     deadline?: Date;
 }
 const p = Astro.props;
-const base = import.meta.env.BASE_URL;
-const href = `${base}/items/${p.slug}`;
+const href = withBase(`items/${p.slug}`);
 const isRemoteImage = typeof p.image === "string";
 const filled = 6 - p.priority;
 const wantLabel = PRIORITY_LABELS[p.priority] ?? `Приоритет ${p.priority}`;

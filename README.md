@@ -22,6 +22,26 @@ npm run dev
 3. Запушить в `master` — workflow `.github/workflows/deploy.yml` соберёт и опубликует.
    Сайт будет на `https://<username>.github.io/wishlist`.
 
+Адрес сайта берётся из имени репозитория: `owner/wishlist` → `https://owner.github.io/wishlist`,
+`owner/owner.github.io` → `https://owner.github.io`. Для своего домена задайте в
+**Settings → Secrets and variables → Actions → Variables** `SITE` (напр. `https://wish.example.com`)
+и `BASE_PATH` (`/`).
+
+## Настройки — `wishlist.config.json`
+
+```json
+{
+  "schemaVersion": 1,
+  "title": "Мой вишлист",
+  "defaultCurrency": "RUB"
+}
+```
+
+- `title` — заголовок главной страницы.
+- `defaultCurrency` — валюта карточки, если `currency` не указан.
+- `schemaVersion` — версия формата карточек. По ней Wishlist Editor понимает, что умеет
+  редактировать этот репозиторий. Не меняйте вручную.
+
 ## Аналитика (Яндекс.Метрика)
 
 Опционально. Создайте счётчик на [metrika.yandex.ru](https://metrika.yandex.ru), возьмите
