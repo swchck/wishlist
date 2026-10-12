@@ -89,8 +89,7 @@ description: Короткое описание для карточки.
 ```
 
 **Свободный подарок** (без конкретной ссылки на покупку) — просто не указывайте `url`
-и `price`, опишите желаемое в теле и дайте `links` с референсом. Пример —
-`src/content/items/gravy-boat.md`.
+и `price`, опишите желаемое в теле и дайте `links` с референсом.
 
 ## Управление бронями
 
@@ -102,9 +101,11 @@ description: Короткое описание для карточки.
 
 ```sql
 -- снять бронь
-update public.reservations set reserved=false, reserved_at=null, token_hash=null where slug='<slug>';
+update public.reservations set reserved = false, reserved_at = null where slug = '<slug>';
+delete from public.reservation_secrets where slug = '<slug>';
 -- посмотреть занятое
 select slug, reserved_at from public.reservations where reserved order by reserved_at;
 -- сбросить всё после праздника
-update public.reservations set reserved=false, reserved_at=null, token_hash=null;
+update public.reservations set reserved = false, reserved_at = null;
+delete from public.reservation_secrets;
 ```
